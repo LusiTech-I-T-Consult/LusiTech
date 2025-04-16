@@ -89,7 +89,7 @@
                             class="col-lg-6 order-2 order-lg-1 d-flex flex-column justify-content-center"
                         >
                             <h1>
-                                Bettter Digital Experience With LusiTech I.T
+                                Bettter Digital Experience With LusiTech IT
                                 Consult
                             </h1>
                             <p>Coming very soon!</p>
@@ -98,22 +98,6 @@
                                     >Get Started</a
                                 >
                             </div> -->
-                            <form
-                                method="post"
-                                action="{% url 'join_waitlist' %}"
-                                class="d-flex flex-column flex-md-row gap-2 mt-3"
-                            >
-                                {% csrf_token %} {{ form.email}}
-                                <button type="submit" class="btn btn-primary">
-                                    Join Waitlist
-                                </button>
-                            </form>
-
-                            {% if messages %} {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">
-                                {{ message }}
-                            </div>
-                            {% endfor %} {% endif %}
                         </div>
                         <div class="col-lg-6 order-1 order-lg-2 hero-img">
                             <img
