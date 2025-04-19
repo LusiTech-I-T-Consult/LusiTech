@@ -13,3 +13,11 @@ output "primary_s3_bucket" {
 output "dr_s3_bucket" {
   value = module.s3.dr_bucket_name
 }
+
+output "primary_db_endpoint" {
+  value = module.rds.primary_db_endpoint
+}
+
+output "dr_db_endpoint" {
+  value = module.rds.dr_db_endpoint
+}
