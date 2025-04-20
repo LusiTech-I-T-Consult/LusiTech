@@ -123,8 +123,9 @@ resource "aws_db_instance" "dr_replica" {
   replicate_source_db = aws_db_instance.primary.arn
   instance_class      = var.db_instance_class
 
-  # Add this line to enable encryption
+  # Explicitly enable encryption and specify a KMS key in the DR region
   storage_encrypted = true
+  kms_key_id        = aws_kms_key.dr_rds_key.arn # You'll need to create this key
 
   vpc_security_group_ids = [var.dr_sg_id]
   db_subnet_group_name   = aws_db_subnet_group.dr.name
@@ -146,6 +147,22 @@ resource "aws_db_instance" "dr_replica" {
       Name = "${var.project_name}-${var.environment}-dr-replica-db"
     }
   )
+}
+
+# Create a KMS key in the DR region for RDS encryption
+resource "aws_kms_key" "dr_rds_key" {
+  provider                = aws.dr
+  description             = "KMS key for RDS encryption in DR region"
+  deletion_window_in_days = 30
+  enable_key_rotation     = true
+
+  tags = var.tags
+}
+
+resource "aws_kms_alias" "dr_rds_key_alias" {
+  provider      = aws.dr
+  name          = "alias/${var.project_name}-${var.environment}-dr-rds-key"
+  target_key_id = aws_kms_key.dr_rds_key.key_id
 }
 
 # Create CloudWatch metrics alarm for replication lag
@@ -230,7 +247,7 @@ resource "aws_lambda_function" "promote_replica" {
   runtime       = "nodejs16.x"
   timeout       = 60
 
-  filename = "${path.module}/promote_replica_lambda.zip" # This should be created separately
+  filename = "${path.module}/promote_replica_lambda.zip"
 
   environment {
     variables = {
