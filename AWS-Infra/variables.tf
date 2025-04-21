@@ -37,3 +37,67 @@ variable "ec2_instance_type" {
   description = "Instance type for EC2 servers"
   default     = "t3.medium"
 }
+
+variable "primary_ami_id" {
+  description = "AMI ID for the primary region EC2 instances (required)"
+  type        = string
+  validation {
+    condition     = length(var.primary_ami_id) > 4 && substr(var.primary_ami_id, 0, 4) == "ami-"
+    error_message = "The primary_ami_id must be a valid AMI ID, starting with \"ami-\"."
+  }
+}
+
+variable "dr_ami_id" {
+  description = "AMI ID for the DR region EC2 instances (required)"
+  type        = string
+  validation {
+    condition     = length(var.dr_ami_id) > 4 && substr(var.dr_ami_id, 0, 4) == "ami-"
+    error_message = "The dr_ami_id must be a valid AMI ID, starting with \"ami-\"."
+  }
+}
+
+variable "primary_certificate_arn" {
+  description = "ARN of the SSL certificate for the primary region load balancer"
+  type        = string
+  default     = ""
+}
+
+variable "dr_certificate_arn" {
+  description = "ARN of the SSL certificate for the DR region load balancer"
+  type        = string
+  default     = ""
+}
+
+variable "ssh_public_key" {
+  description = "SSH public key for accessing EC2 instances"
+  type        = string
+  default     = ""
+}
+
+variable "domain_name" {
+  description = "The domain name for Route 53 records"
+  type        = string
+}
+
+variable "record_name" {
+  description = "The record name for Route 53 records (subdomain - optional)"
+  type        = string
+  default     = ""
+}
+
+variable "create_route53_records" {
+  description = "Whether to create Route 53 records. Set to false if you don't have a hosted zone yet."
+  type        = bool
+  default     = false
+}
+
+variable "db_name" {
+  description = "Name of the database"
+  type        = string
+  default     = "django_db"
+}
+
+variable "db_secret_arn" {
+  description = "ARN of the secret in Secrets Manager containing database credentials"
+  type        = string
+}
