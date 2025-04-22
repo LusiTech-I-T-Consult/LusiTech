@@ -1,4 +1,3 @@
-# EC2 Module for Pilot Light Disaster Recovery
 
 resource "aws_key_pair" "app_key" {
   count      = var.ssh_public_key != "" ? 1 : 0
@@ -26,7 +25,7 @@ resource "aws_security_group" "app_sg" {
     protocol        = "tcp"
     security_groups = [var.lb_security_group_id]
   }
-  
+
   # Also allow direct HTTP access for testing
   ingress {
     from_port   = 80
@@ -43,7 +42,7 @@ resource "aws_security_group" "app_sg" {
     protocol        = "tcp"
     security_groups = [var.lb_security_group_id]
   }
-  
+
   # Also allow direct HTTPS access for testing
   ingress {
     from_port   = 443
@@ -90,17 +89,19 @@ resource "aws_launch_template" "app" {
   instance_type = var.instance_type
   key_name      = length(aws_key_pair.app_key) > 0 ? aws_key_pair.app_key[0].key_name : null
 
-  user_data = base64encode(templatefile("${path.module}/templates/user_data.tpl", {
-    db_endpoint   = var.db_endpoint
-    db_name       = var.db_name
-    db_username   = var.db_username
-    db_password   = var.db_password
-    s3_bucket     = var.s3_bucket_name
-    aws_region    = var.region
-    project_name  = var.project_name
-    environment   = var.environment
-    is_primary    = var.is_primary
-    db_secret_arn = var.db_secret_arn
+  user_data = base64encode(templatefile("${path.module}/templates/user_data.sh", {
+    db_endpoint    = var.db_endpoint
+    db_name        = var.db_name
+    db_username    = var.db_username
+    db_password    = var.db_password
+    s3_bucket      = var.s3_bucket_name
+    aws_region     = var.region
+    project_name   = var.project_name
+    environment    = var.environment
+    is_primary     = var.is_primary
+    db_secret_arn  = var.db_secret_arn
+    aws_access_key = var.aws_access_key
+    aws_secret_key = var.aws_secret_key
   }))
 
   iam_instance_profile {
@@ -187,8 +188,8 @@ resource "aws_autoscaling_group" "app" {
 
 # IAM role for EC2 instances to access S3 and other services
 resource "aws_iam_role" "app_role" {
-  provider           = aws
-  name               = "${var.project_name}-${var.environment}-app-role"
+  provider = aws
+  name     = "${var.project_name}-${var.environment}-app-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -210,16 +211,22 @@ resource "aws_iam_policy" "s3_access" {
   provider    = aws
   name        = "${var.project_name}-${var.environment}-s3-access"
   description = "Allow EC2 instances to access the S3 bucket"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = [
           "s3:GetObject",
           "s3:PutObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:GetObjectVersion",
+          "s3:ListBucketVersions",
+          "s3:PutObjectVersionTagging",
+          "s3:GetObjectTagging",
+          "s3:PutObjectTagging"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           "arn:aws:s3:::${var.s3_bucket_name}",
           "arn:aws:s3:::${var.s3_bucket_name}/*"
@@ -234,14 +241,14 @@ resource "aws_iam_policy" "secrets_access" {
   provider    = aws
   name        = "${var.project_name}-${var.environment}-secrets-access"
   description = "Allow EC2 instances to access secrets in Secrets Manager"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           var.db_secret_arn
         ]

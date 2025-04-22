@@ -18,6 +18,8 @@ module "s3" {
   dr_region      = var.dr_region
   environment    = var.environment
   project_name   = var.project_name
+  ec2_role_arn   = module.primary_ec2.app_role_arn
+  ec2_role_arn_dr = module.dr_ec2.app_role_arn
 
   tags = local.common_tags
 }
@@ -137,6 +139,8 @@ module "primary_ec2" {
   db_name        = var.db_name
   db_secret_arn  = var.db_secret_arn
   s3_bucket_name = module.s3.primary_bucket_name
+  aws_access_key = var.aws_access_key
+  aws_secret_key = var.aws_secret_key
   
   tags = local.common_tags
 }
@@ -165,6 +169,8 @@ module "dr_ec2" {
   db_name        = var.db_name
   db_secret_arn  = var.db_secret_arn
   s3_bucket_name = module.s3.dr_bucket_name
+  aws_access_key = var.aws_access_key
+  aws_secret_key = var.aws_secret_key
   
   tags = local.common_tags
 }

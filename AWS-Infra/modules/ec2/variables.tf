@@ -127,9 +127,22 @@ variable "db_password" {
 variable "db_secret_arn" {
   description = "ARN of the secret in Secrets Manager containing database credentials"
   type        = string
+  default     = "arn:aws:secretsmanager:eu-west-1:875986301930:secret:pilot-light-dr-prod-db-password-Q7remj"
 }
 
 variable "s3_bucket_name" {
   description = "Name of the S3 bucket for storing application assets"
   type        = string
+}
+
+variable "aws_access_key" {
+  description = "AWS access key for Docker container"
+  type        = string
+  sensitive   = true
+}
+
+variable "aws_secret_key" {
+  description = "AWS secret key for Docker container"
+  type        = string
+  sensitive   = true
 }
