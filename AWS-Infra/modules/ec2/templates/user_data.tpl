@@ -27,8 +27,8 @@ timeout 60 bash -c 'until docker info; do sleep 1; done'
 # Build and start Docker containers
 echo "=== Building and starting Docker containers ==="
 cd /app
-docker compose build
-docker compose up -d
+docker build -t lusitech .
+docker run -p 8000:8000 lusitech
 
 # Install AWS CLI v2
 echo "=== Installing AWS CLI v2 ==="

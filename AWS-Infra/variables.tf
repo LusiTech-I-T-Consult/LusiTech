@@ -104,15 +104,3 @@ variable "db_secret_arn" {
   type        = string
   default     = "arn:aws:secretsmanager:eu-west-1:875986301930:secret:pilot-light-dr-prod-db-password-Q7remj"
 }
-
-variable "aws_access_key" {
-  description = "AWS access key for Docker container"
-  type        = string
-  sensitive   = true
-}
-
-variable "aws_secret_key" {
-  description = "AWS secret key for Docker container"
-  type        = string
-  sensitive   = true
-}
