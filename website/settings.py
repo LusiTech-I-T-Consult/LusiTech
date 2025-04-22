@@ -24,9 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fqc1w&w6($4g50rs7^lia&^t^+&1@eyp6r%m^(&cm^k!c(ba8q')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+<<<<<<< HEAD
 DEBUG = os.environ.get('DEBUG', '1') == '1'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+=======
+DEBUG = False
+
+ALLOWED_HOSTS = ['*']  # In production, replace with your actual domain/IP
+>>>>>>> 0e51e57222f3bb65d159060e88ef7b1705c2eb1d
 
 
 # Application definition
@@ -74,6 +80,8 @@ WSGI_APPLICATION = "website.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+
+import os
 
 DATABASES = {
     "default": {

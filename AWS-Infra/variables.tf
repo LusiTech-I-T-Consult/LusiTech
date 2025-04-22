@@ -45,6 +45,7 @@ variable "primary_ami_id" {
     condition     = length(var.primary_ami_id) > 4 && substr(var.primary_ami_id, 0, 4) == "ami-"
     error_message = "The primary_ami_id must be a valid AMI ID, starting with \"ami-\"."
   }
+  default = "ami-0182a7ec1f4364ac4"
 }
 
 variable "dr_ami_id" {
@@ -54,6 +55,7 @@ variable "dr_ami_id" {
     condition     = length(var.dr_ami_id) > 4 && substr(var.dr_ami_id, 0, 4) == "ami-"
     error_message = "The dr_ami_id must be a valid AMI ID, starting with \"ami-\"."
   }
+  default = "ami-010fc6854b20fbff7"
 }
 
 variable "primary_certificate_arn" {
@@ -100,4 +102,5 @@ variable "db_name" {
 variable "db_secret_arn" {
   description = "ARN of the secret in Secrets Manager containing database credentials"
   type        = string
+  default     = "arn:aws:secretsmanager:eu-west-1:875986301930:secret:pilot-light-dr-prod-db-password-Q7remj"
 }

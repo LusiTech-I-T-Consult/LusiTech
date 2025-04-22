@@ -1,119 +1,70 @@
 #!/bin/bash
 set -e
 
-# Update and install dependencies
-apt-get update
-apt-get install -y python3-pip python3-venv nginx supervisor git awscli jq
+# Install Docker and Git
+echo "=== Installing Docker and Git ==="
+yum update -y
+yum install -y docker git
+systemctl enable docker
+systemctl start docker
 
-# Get database credentials from Secrets Manager
-DB_SECRET=$(aws secretsmanager get-secret-value --secret-id ${db_secret_arn} --region ${aws_region} --query SecretString --output text)
-DB_USERNAME=$(echo $DB_SECRET | jq -r '.username')
-DB_PASSWORD=$(echo $DB_SECRET | jq -r '.password')
+# Install Docker Compose
+echo "=== Installing Docker Compose ==="
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
-# Set environment variables
-echo "export DB_HOST=${db_endpoint}" >> /etc/environment
-echo "export DB_NAME=${db_name}" >> /etc/environment
-echo "export DB_USER=$DB_USERNAME" >> /etc/environment
-echo "export DB_PASSWORD=$DB_PASSWORD" >> /etc/environment
-echo "export S3_BUCKET=${s3_bucket}" >> /etc/environment
-echo "export AWS_REGION=${aws_region}" >> /etc/environment
-echo "export IS_PRIMARY=${is_primary}" >> /etc/environment
+# Create app directory and clone repository
+echo "=== Cloning application from GitHub ==="
+mkdir -p /app
+cd /app
+git clone https://github.com/LusiTech-I-T-Consult/LusiTech.git .
 
-# Create app directory
-mkdir -p /var/www/django-app
+# Wait for Docker to be ready
+echo "=== Waiting for Docker to be ready ==="
+timeout 60 bash -c 'until docker info; do sleep 1; done'
 
-# Clone the application repository or sync from S3
-cd /var/www/django-app
+# Build and start Docker containers
+echo "=== Building and starting Docker containers ==="
+cd /app
+docker build -t lusitech .
+docker run -p 8000:8000 lusitech
 
-# If we're in DR mode, sync the application state from S3
-if [ "${is_primary}" = "false" ]; then
-  aws s3 sync s3://${s3_bucket}/app-backup/ /var/www/django-app/
-else
-  # For primary region, we might pull from a git repository instead
-  # git clone https://your-repo-url.git .
-  # Or sync from S3 bucket if you have pre-deployed code there
-  aws s3 sync s3://${s3_bucket}/app-backup/ /var/www/django-app/
-  
-  # Set up a cron job to regularly backup the app to S3
-  echo "*/30 * * * * root aws s3 sync /var/www/django-app/ s3://${s3_bucket}/app-backup/" > /etc/cron.d/app-backup
+# Install AWS CLI v2
+echo "=== Installing AWS CLI v2 ==="
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+yum install -y unzip
+unzip awscliv2.zip
+./aws/install
+
+# Set up environment variables
+cat > /app/.env << EOF
+DJANGO_SETTINGS_MODULE=website.settings
+DEBUG=0
+ALLOWED_HOSTS=*
+IS_PRIMARY=${is_primary}
+AWS_REGION=${aws_region}
+AWS_DEFAULT_REGION=${aws_region}
+PROJECT_NAME=${project_name}
+ENVIRONMENT=${environment}
+EOF
+
+# Set up container health check script
+cat > /app/check_containers.sh << 'EOF'
+#!/bin/bash
+if ! docker ps --filter "name=lusitech" --format '{{.Names}}' | grep -q .; then
+    cd /app && docker compose up -d
 fi
-
-# Set up Python virtual environment
-python3 -m venv /var/www/django-app/venv
-source /var/www/django-app/venv/bin/activate
-pip install -r /var/www/django-app/requirements.txt
-
-# Configure Nginx
-cat > /etc/nginx/sites-available/django-app << 'EOF'
-server {
-    listen 80;
-    server_name _;
-
-    location /static/ {
-        alias /var/www/django-app/static/;
-    }
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
 EOF
 
-ln -sf /etc/nginx/sites-available/django-app /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
+chmod +x /app/check_containers.sh
 
-# Configure Supervisor to run the Django application
-cat > /etc/supervisor/conf.d/django-app.conf << 'EOF'
-[program:django-app]
-directory=/var/www/django-app
-command=/var/www/django-app/venv/bin/gunicorn website.wsgi:application --bind 127.0.0.1:8000 --workers 3
-autostart=true
-autorestart=true
-stdout_logfile=/var/log/django-app.log
-stderr_logfile=/var/log/django-app-error.log
-environment=PATH="/var/www/django-app/venv/bin"
-user=www-data
-group=www-data
-EOF
+# Add health check to crontab
+echo "*/5 * * * * root /app/check_containers.sh" > /etc/cron.d/check_containers
 
-# Fix permissions
-chown -R www-data:www-data /var/www/django-app
-
-# Collect static files
-cd /var/www/django-app
-source venv/bin/activate
-python manage.py collectstatic --noinput
-
-# Run migrations if in primary region or if DB is ready in DR
-if [ "${is_primary}" = "true" ]; then
-  python manage.py migrate --noinput
-  
-  # Create superuser if needed (you might want to use environment variables here)
-  # python manage.py createsuperuser --noinput
-fi
-
-# Restart services
-supervisorctl reread
-supervisorctl update
-service nginx restart
-
-# Health check endpoint for load balancer
-cat > /var/www/health.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Health Check</title>
-</head>
-<body>
-    <h1>OK</h1>
-</body>
-</html>
-EOF
-
-chown www-data:www-data /var/www/health.html
+# Print container status
+echo "=== Final Container Status ==="
+docker ps
+docker compose logs
 
 echo "Instance setup complete"
