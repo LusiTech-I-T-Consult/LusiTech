@@ -1,13 +1,32 @@
-FROM python:3.10-slim
+# pull official base image
+FROM python:alpine3.20
 
-WORKDIR /app
 
-COPY requirements.txt /app/
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Set working directory
+WORKDIR /home/app
+RUN mkdir /home/app/staticfiles
+RUN mkdir /home/app/mediafiles
 
-COPY . /app/
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# (for production)
-# RUN python manage.py collectstatic --noinput
+# Install Python dependencies
+RUN pip install --upgrade pip
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Copy project files
+COPY . /home/app
+
+# Copy entrypoint script
+COPY ./entrypoint.sh /home/app/entrypoint.sh
+
+# Give execute permissions to entrypoint script
+RUN chmod +x /home/app/entrypoint.sh
+
+# Expose the Django application port
+EXPOSE 8000
+
+# Define entrypoint script and default arguments
+CMD ["/home/app/entrypoint.sh"]
