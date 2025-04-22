@@ -89,21 +89,12 @@ resource "aws_launch_template" "app" {
   instance_type = var.instance_type
   key_name      = length(aws_key_pair.app_key) > 0 ? aws_key_pair.app_key[0].key_name : null
 
-  user_data = base64encode(templatefile("${path.module}/templates/user_data.sh", {
-    db_endpoint    = var.db_endpoint
-    db_name        = var.db_name
-    db_username    = var.db_username
-    db_password    = var.db_password
-    s3_bucket      = var.s3_bucket_name
-    aws_region     = var.region
-    project_name   = var.project_name
-    environment    = var.environment
-    is_primary     = var.is_primary
-    db_secret_arn  = var.db_secret_arn
-    aws_access_key = var.aws_access_key
-    aws_secret_key = var.aws_secret_key
+  user_data = base64encode(templatefile("${path.module}/templates/user_data.tpl", {
+    aws_region   = var.region
+    project_name = var.project_name
+    environment  = var.environment
+    is_primary   = var.is_primary
   }))
-
   iam_instance_profile {
     name = aws_iam_instance_profile.app_profile.name
   }

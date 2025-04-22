@@ -9,45 +9,13 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-import boto3
-import json
-from botocore.exceptions import ClientError
-import os
-import json
+
 from pathlib import Path
-import requests
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-def get_current_region():
-    try:
-        response = requests.get(
-            "http://169.254.169.254/latest/dynamic/instance-identity/document",
-            timeout=2
-        )
-        region = response.json().get("region")
-        if region:
-            print(f"Detected region from metadata: {region}")
-            return region
-    except Exception as e:
-        print(f"Metadata fallback failed: {e}")
 
-
-def get_database_secrets():
-    current_region = get_current_region()
-    secret_name = "pilot-light-dr-prod-db-password"
-    print(f"print current region: {current_region}")
-
-    try:
-        print(f"Fetching secret: {secret_name}")
-        client = boto3.client("secretsmanager", region_name=current_region)
-        response = client.get_secret_value(SecretId=secret_name)
-        return json.loads(response["SecretString"])
-    except ClientError as e:
-        print(f"Failed to fetch secret: {e}")
-        raise RuntimeError("Could not retrieve DB credentials")
-secrets = get_database_secrets()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -55,9 +23,9 @@ secrets = get_database_secrets()
 SECRET_KEY = "django-insecure-fqc1w&w6($4g50rs7^lia&^t^+&1@eyp6r%m^(&cm^k!c(ba8q"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # In production, replace with your actual domain/IP
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -105,16 +73,10 @@ WSGI_APPLICATION = "website.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-import os
-
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.postgresql"),
-        "NAME": secrets.get("dbname", os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3")),
-        "USER": secrets.get("username", os.environ.get("SQL_USER", "user")),
-        "PASSWORD": secrets.get("password", os.environ.get("SQL_PASSWORD", "password")),
-        "HOST": secrets.get("host", os.environ.get("SQL_HOST", "localhost")),
-        "PORT": secrets.get("port", os.environ.get("SQL_PORT", "5432")),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
@@ -153,16 +115,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-
-
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 
 

@@ -1,5 +1,13 @@
 # pull official base image
-FROM python:alpine3.20
+FROM python:3.11-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    postgresql-dev \
+    gcc \
+    python3-dev \
+    musl-dev \
+    libffi-dev
 
 
 # Set working directory
