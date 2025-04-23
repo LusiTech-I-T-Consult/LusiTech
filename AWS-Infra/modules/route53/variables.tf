@@ -1,6 +1,7 @@
 variable "domain_name" {
   description = "The domain name for Route 53 records"
   type        = string
+  default     = "lusitechitconsult.com"
 }
 
 variable "create_route53_records" {

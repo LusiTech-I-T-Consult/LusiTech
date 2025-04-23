@@ -50,21 +50,21 @@ ENVIRONMENT=${environment}
 EOF
 
 # Set up container health check script
-# cat > /app/check_containers.sh << 'EOF'
-# #!/bin/bash
-# if ! docker ps --filter "name=lusitech" --format '{{.Names}}' | grep -q .; then
-#     cd /app && docker compose up -d
-# fi
-# EOF
+cat > /app/check_containers.sh << 'EOF'
+#!/bin/bash
+if ! docker ps --filter "name=lusitech" --format '{{.Names}}' | grep -q .; then
+    cd /app && docker compose up -d
+fi
+EOF
 
-# chmod +x /app/check_containers.sh
+chmod +x /app/check_containers.sh
 
-# # Add health check to crontab
-# echo "*/5 * * * * root /app/check_containers.sh" > /etc/cron.d/check_containers
+# Add health check to crontab
+echo "*/5 * * * * root /app/check_containers.sh" > /etc/cron.d/check_containers
 
-# # Print container status
-# echo "=== Final Container Status ==="
-# docker ps
-# docker compose logs
+# Print container status
+echo "=== Final Container Status ==="
+docker ps
+docker compose logs
 
-# echo "Instance setup complete"
+echo "Instance setup complete"

@@ -28,11 +28,11 @@ resource "aws_route53_health_check" "primary" {
 # Route 53 record with failover routing policy
 # Primary region record
 resource "aws_route53_record" "primary" {
-  count           = var.create_route53_records ? 1 : 0
-  zone_id         = data.aws_route53_zone.selected[0].zone_id
-  name            = var.record_name != "" ? var.record_name : var.domain_name
-  type            = "A"
-  set_identifier  = "primary"
+  count          = var.create_route53_records ? 1 : 0
+  zone_id        = data.aws_route53_zone.selected[0].zone_id
+  name           = var.record_name != "" ? var.record_name : var.domain_name
+  type           = "A"
+  set_identifier = "primary"
   failover_routing_policy {
     type = "PRIMARY"
   }
@@ -47,11 +47,11 @@ resource "aws_route53_record" "primary" {
 
 # DR region record
 resource "aws_route53_record" "dr" {
-  count           = var.create_route53_records ? 1 : 0
-  zone_id         = data.aws_route53_zone.selected[0].zone_id
-  name            = var.record_name != "" ? var.record_name : var.domain_name
-  type            = "A"
-  set_identifier  = "dr"
+  count          = var.create_route53_records ? 1 : 0
+  zone_id        = data.aws_route53_zone.selected[0].zone_id
+  name           = var.record_name != "" ? var.record_name : var.domain_name
+  type           = "A"
+  set_identifier = "dr"
   failover_routing_policy {
     type = "SECONDARY"
   }

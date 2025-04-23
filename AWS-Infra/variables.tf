@@ -79,6 +79,7 @@ variable "ssh_public_key" {
 variable "domain_name" {
   description = "The domain name for Route 53 records"
   type        = string
+  default     = "lusitechitconsult.com"
 }
 
 variable "record_name" {
@@ -90,7 +91,7 @@ variable "record_name" {
 variable "create_route53_records" {
   description = "Whether to create Route 53 records. Set to false if you don't have a hosted zone yet."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "db_name" {
