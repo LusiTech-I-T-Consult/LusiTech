@@ -11,35 +11,6 @@ resource "aws_s3_bucket" "primary" {
   )
 }
 
-# Bucket policy for primary bucket
-resource "aws_s3_bucket_policy" "primary" {
-  provider = aws.primary
-  bucket   = aws_s3_bucket.primary.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid       = "AllowEC2Access"
-        Effect    = "Allow"
-        Principal = {
-          AWS = var.ec2_role_arn
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          aws_s3_bucket.primary.arn,
-          "${aws_s3_bucket.primary.arn}/*"
-        ]
-      }
-    ]
-  })
-}
-
 # Enable versioning on primary bucket
 resource "aws_s3_bucket_versioning" "primary" {
   provider = aws.primary
@@ -73,35 +44,6 @@ resource "aws_s3_bucket" "dr" {
       Name = "${var.project_name}-${var.environment}-dr-bucket"
     }
   )
-}
-
-# Bucket policy for DR bucket
-resource "aws_s3_bucket_policy" "dr" {
-  provider = aws.dr
-  bucket   = aws_s3_bucket.dr.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid       = "AllowEC2Access"
-        Effect    = "Allow"
-        Principal = {
-          AWS = var.ec2_role_arn_dr
-        }
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:ListBucket",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          aws_s3_bucket.dr.arn,
-          "${aws_s3_bucket.dr.arn}/*"
-        ]
-      }
-    ]
-  })
 }
 
 # Enable versioning on DR bucket
@@ -280,23 +222,4 @@ resource "aws_s3_bucket_lifecycle_configuration" "dr" {
       days = 365 # Expire objects after 1 year
     }
   }
-}
-
-# Block public access to both buckets
-resource "aws_s3_bucket_public_access_block" "primary" {
-  provider                = aws.primary
-  bucket                 = aws_s3_bucket.primary.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
-}
-
-resource "aws_s3_bucket_public_access_block" "dr" {
-  provider                = aws.dr
-  bucket                 = aws_s3_bucket.dr.id
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
 }

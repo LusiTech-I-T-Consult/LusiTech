@@ -23,13 +23,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-
-variable "ec2_role_arn" {
-  description = "ARN of the EC2 IAM role for primary region"
-  type        = string
-}
-
-variable "ec2_role_arn_dr" {
-  description = "ARN of the EC2 IAM role for DR region"
-  type        = string
-}

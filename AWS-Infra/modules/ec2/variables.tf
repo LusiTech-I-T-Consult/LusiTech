@@ -127,7 +127,6 @@ variable "db_password" {
 variable "db_secret_arn" {
   description = "ARN of the secret in Secrets Manager containing database credentials"
   type        = string
-  default     = "arn:aws:secretsmanager:eu-west-1:875986301930:secret:pilot-light-dr-prod-db-password-Q7remj"
 }
 
 variable "s3_bucket_name" {

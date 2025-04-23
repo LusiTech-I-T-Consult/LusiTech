@@ -18,8 +18,6 @@ module "s3" {
   dr_region      = var.dr_region
   environment    = var.environment
   project_name   = var.project_name
-  ec2_role_arn   = module.primary_ec2.app_role_arn
-  ec2_role_arn_dr = module.dr_ec2.app_role_arn
 
   tags = local.common_tags
 }

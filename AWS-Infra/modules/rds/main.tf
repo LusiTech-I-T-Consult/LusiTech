@@ -11,6 +11,11 @@ resource "aws_secretsmanager_secret" "db_password" {
   description = "Database password for ${var.project_name} ${var.environment}"
 
   tags = var.tags
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes  = [name, description, tags]
+  }
 }
 
 resource "aws_secretsmanager_secret_version" "db_password" {

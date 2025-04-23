@@ -1,19 +1,19 @@
-output "app_role_arn" {
-  description = "ARN of the EC2 instance IAM role"
-  value       = aws_iam_role.app_role.arn
-}
-
-output "instance_profile_name" {
-  description = "Name of the EC2 instance profile"
-  value       = aws_iam_instance_profile.app_profile.name
-}
-
-output "instance_profile_arn" {
-  description = "ARN of the EC2 instance profile"
-  value       = aws_iam_instance_profile.app_profile.arn
-}
-
 output "autoscaling_group_name" {
-  description = "Name of the Auto Scaling Group"
+  description = "The name of the Auto Scaling Group"
   value       = aws_autoscaling_group.app.name
+}
+
+output "security_group_id" {
+  description = "The ID of the security group for the application instances"
+  value       = aws_security_group.app_sg.id
+}
+
+output "launch_template_id" {
+  description = "The ID of the launch template"
+  value       = aws_launch_template.app.id
+}
+
+output "iam_role_arn" {
+  description = "The ARN of the IAM role for the application instances"
+  value       = aws_iam_role.app_role.arn
 }

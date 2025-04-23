@@ -26,7 +26,7 @@ resource "aws_security_group" "app_sg" {
     protocol        = "tcp"
     security_groups = [var.lb_security_group_id]
   }
-  
+
   # Also allow direct HTTP access for testing
   ingress {
     from_port   = 80
@@ -43,7 +43,7 @@ resource "aws_security_group" "app_sg" {
     protocol        = "tcp"
     security_groups = [var.lb_security_group_id]
   }
-  
+
   # Also allow direct HTTPS access for testing
   ingress {
     from_port   = 443
@@ -140,14 +140,15 @@ resource "aws_launch_template" "app" {
 
 # Auto Scaling Group for the application
 resource "aws_autoscaling_group" "app" {
-  provider            = aws
-  name                = "${var.project_name}-${var.environment}-app-asg"
-  min_size            = var.is_primary ? var.min_size : 0
-  max_size            = var.is_primary ? var.max_size : var.dr_max_size
-  desired_capacity    = var.is_primary ? var.desired_capacity : 0
-  vpc_zone_identifier = var.subnet_ids
-  target_group_arns   = [var.target_group_arn]
-  health_check_type   = "ELB"
+  provider                  = aws
+  name                      = "${var.project_name}-${var.environment}-app-asg"
+  min_size                  = var.is_primary ? var.min_size : 0
+  max_size                  = var.is_primary ? var.max_size : var.dr_max_size
+  desired_capacity          = var.is_primary ? var.desired_capacity : 0
+  vpc_zone_identifier       = var.subnet_ids
+  target_group_arns         = [var.target_group_arn]
+  health_check_type         = "EC2" # Changed from ELB to EC2 for initial troubleshooting
+  health_check_grace_period = 300   # 5 minutes grace period for initialization
 
   launch_template {
     id      = aws_launch_template.app.id
@@ -187,8 +188,8 @@ resource "aws_autoscaling_group" "app" {
 
 # IAM role for EC2 instances to access S3 and other services
 resource "aws_iam_role" "app_role" {
-  provider           = aws
-  name               = "${var.project_name}-${var.environment}-app-role"
+  provider = aws
+  name     = "${var.project_name}-${var.environment}-app-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -210,7 +211,7 @@ resource "aws_iam_policy" "s3_access" {
   provider    = aws
   name        = "${var.project_name}-${var.environment}-s3-access"
   description = "Allow EC2 instances to access the S3 bucket"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -219,7 +220,7 @@ resource "aws_iam_policy" "s3_access" {
           "s3:PutObject",
           "s3:ListBucket"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           "arn:aws:s3:::${var.s3_bucket_name}",
           "arn:aws:s3:::${var.s3_bucket_name}/*"
@@ -234,14 +235,14 @@ resource "aws_iam_policy" "secrets_access" {
   provider    = aws
   name        = "${var.project_name}-${var.environment}-secrets-access"
   description = "Allow EC2 instances to access secrets in Secrets Manager"
-  policy      = jsonencode({
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           var.db_secret_arn
         ]
@@ -307,7 +308,7 @@ resource "aws_cloudwatch_metric_alarm" "low_cpu" {
   statistic           = "Average"
   threshold           = 20
   alarm_description   = "This metric monitors ec2 cpu utilization"
-  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  # alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.app.name
