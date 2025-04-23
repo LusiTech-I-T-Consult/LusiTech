@@ -36,6 +36,14 @@ resource "aws_security_group" "app_sg" {
     description = "Allow HTTP from internet for testing"
   }
 
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow traffic on port 8000 for application"
+  }
+
   # Allow HTTPS traffic from the load balancer security group
   ingress {
     from_port       = 443
@@ -308,7 +316,7 @@ resource "aws_cloudwatch_metric_alarm" "low_cpu" {
   statistic           = "Average"
   threshold           = 20
   alarm_description   = "This metric monitors ec2 cpu utilization"
-  # alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
+  alarm_actions       = [aws_autoscaling_policy.scale_down.arn]
 
   dimensions = {
     AutoScalingGroupName = aws_autoscaling_group.app.name
