@@ -262,3 +262,39 @@ resource "aws_lambda_function" "promote_replica" {
 
   tags = var.tags
 }
+
+resource "aws_cloudwatch_event_rule" "trigger_lambda_on_alarm" {
+  provider    = aws.dr
+  name        = "${var.project_name}-${var.environment}-rds-promotion-rule"
+  description = "Trigger Lambda function when DR read replica is unhealthy or lagging"
+
+  event_pattern = jsonencode({
+    "source" : ["aws.cloudwatch"],
+    "detail-type" : ["CloudWatch Alarm State Change"],
+    "detail" : {
+      "state" : {
+        "value" : "ALARM"
+      },
+      "alarmName" : [
+        "${aws_cloudwatch_metric_alarm.replication_lag.alarm_name}"
+      ]
+    }
+  })
+  target = var.tags
+}
+
+resource "aws_cloudwatch_event_target" "invoke_lambda" {
+  provider  = aws.dr
+  rule      = aws_cloudwatch_event_rule.trigger_lambda_on_alarm.name
+  target_id = "promote-read-replica"
+  arn       = aws_lambda_function.promote_replica.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  provider      = aws.dr
+  statement_id  = "AllowEventBridgeInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.promote_replica.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.trigger_lambda_on_alarm.arn
+}
