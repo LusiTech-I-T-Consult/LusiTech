@@ -280,7 +280,7 @@ resource "aws_cloudwatch_event_rule" "trigger_lambda_on_alarm" {
       ]
     }
   })
-  target = var.tags
+  tags = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "invoke_lambda" {

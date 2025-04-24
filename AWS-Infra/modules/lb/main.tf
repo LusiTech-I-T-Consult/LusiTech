@@ -59,8 +59,8 @@ resource "aws_lb" "app_lb" {
 # Target Group for ALB
 resource "aws_lb_target_group" "app_tg" {
   name                 = "${var.project_name}-${var.environment}-tg"
-  port                 = 80
-  protocol             = "HTTP"
+  port                 = 443
+  protocol             = "HTTPS"
   vpc_id               = var.vpc_id
   deregistration_delay = 60
 
@@ -90,7 +90,7 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type = var.certificate_arn != "" ? "redirect" : "forward"
-    
+
     dynamic "redirect" {
       for_each = var.certificate_arn != "" ? [1] : []
       content {
@@ -99,7 +99,7 @@ resource "aws_lb_listener" "http" {
         status_code = "HTTP_301"
       }
     }
-    
+
     target_group_arn = var.certificate_arn == "" ? aws_lb_target_group.app_tg.arn : null
   }
 }
