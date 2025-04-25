@@ -119,7 +119,7 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# CloudWatch Alarms for the Load Balancer
+# CloudWatch Alarms for the Load Balancer.
 resource "aws_cloudwatch_metric_alarm" "high_5xx" {
   alarm_name          = "${var.project_name}-${var.environment}-high-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
