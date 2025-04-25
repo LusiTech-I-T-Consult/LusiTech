@@ -98,9 +98,17 @@ resource "aws_lb_listener" "http" {
       status_code = "HTTP_301"
     }
   }
+  dynamic "forward" {
+    for_each = var.certificate_arn == "" ? [1] : []
+    content {
+      target_group {
+        target_group_arn = aws_lb_target_group.app_tg.arn
+      }
+    }
+  }
 }
 
-# HTTPS Listener.
+# HTTPS Listener: Only if certificate is provided
 resource "aws_lb_listener" "https" {
   count             = var.certificate_arn != "" ? 1 : 0
   load_balancer_arn = aws_lb.app_lb.arn
