@@ -105,3 +105,15 @@ variable "db_secret_arn" {
   type        = string
   default     = "arn:aws:secretsmanager:eu-west-1:875986301930:secret:pilot-light-dr-prod-db-password-Q7remj"
 }
+
+variable "dr_certificate_arn" {
+  description = "ARN of the SSL certificate for the DR region load balancer"
+  type        = string
+  default     = "arn:aws:acm:us-west-2:875986301930:certificate/49c57cb8-e468-441f-9750-074ef4954d66"
+}
+
+variable "primary_certificate_arn" {
+  description = "ARN of the SSL certificate for the primary region load balancer"
+  type        = string
+  default     = "arn:aws:acm:eu-west-1:875986301930:certificate/3339f69a-b097-4707-9b5b-f766d63ab35b"
+}

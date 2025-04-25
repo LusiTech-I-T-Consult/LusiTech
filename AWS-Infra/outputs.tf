@@ -52,3 +52,12 @@ output "primary_direct_url" {
 output "dr_direct_url" {
   value = "https://dr.${var.domain_name}"
 }
+
+# Certificate outputs
+output "primary_certificate_arn" {
+  value = var.primary_certificate_arn
+}
+
+output "dr_certificate_arn" {
+  value = var.dr_certificate_arn
+}
