@@ -19,7 +19,7 @@ variable "dr_vpc_id" {
 }
 
 variable "dr_subnet_ids" {
-  description = "List of subnet IDs for the database in the DR region"
+  description = "List of subnet IDs for the database in the DR2 region"
   type        = list(string)
 }
 
