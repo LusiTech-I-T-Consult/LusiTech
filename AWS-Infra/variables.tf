@@ -103,5 +103,5 @@ variable "dr_certificate_arn" {
 variable "primary_certificate_arn" {
   description = "ARN of the SSL certificate for the primary region load balancer"
   type        = string
-  default     = "arn:aws:acm:eu-west-1:875986301930:certificate/3339f69a-b097-4707-9b5b-f766d63ab35b"
+  default     = "arn:aws:acm:eu-west-1:875986301930:certificate/991c54b4-6c96-49ea-9111-58253b0e8d7c"
 }
