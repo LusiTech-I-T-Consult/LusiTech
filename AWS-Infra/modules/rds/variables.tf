@@ -37,7 +37,7 @@ variable "db_instance_class" {
 variable "allocated_storage" {
   description = "Allocated storage for the database in GB"
   type        = number
-  default     = 10
+  default     = 20
 }
 
 variable "db_username" {
