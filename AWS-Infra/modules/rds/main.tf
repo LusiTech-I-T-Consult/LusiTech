@@ -266,22 +266,24 @@ resource "aws_lambda_function" "promote_replica" {
 resource "aws_cloudwatch_event_rule" "trigger_lambda_on_alarm" {
   provider    = aws.dr
   name        = "${var.project_name}-${var.environment}-rds-promotion-rule"
-  description = "Trigger Lambda function when DR read replica is unhealthy or lagging"
+  description = "Triggers Lambda when DR read replica is unhealthy or lagging"
 
   event_pattern = jsonencode({
     "source" : ["aws.cloudwatch"],
     "detail-type" : ["CloudWatch Alarm State Change"],
     "detail" : {
       "state" : {
-        "value" : "ALARM"
+        "value" : ["ALARM"]
       },
       "alarmName" : [
         "${aws_cloudwatch_metric_alarm.replication_lag.alarm_name}"
       ]
     }
   })
+
   tags = var.tags
 }
+
 
 resource "aws_cloudwatch_event_target" "invoke_lambda" {
   provider  = aws.dr

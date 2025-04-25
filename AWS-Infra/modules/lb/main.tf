@@ -56,7 +56,7 @@ resource "aws_lb" "app_lb" {
   )
 }
 
-# Target Group for ALB
+# Target Group for ALB Using HTTPS
 resource "aws_lb_target_group" "app_tg" {
   name                 = "${var.project_name}-${var.environment}-tg"
   port                 = 443
@@ -100,7 +100,7 @@ resource "aws_lb_listener" "http" {
       }
     }
 
-    target_group_arn = var.certificate_arn == "" ? aws_lb_target_group.app_tg.arn : null
+    target_group_arn = var.certificate_arn == "arn:aws:acm:eu-west-1:875986301930:certificate/3339f69a-b097-4707-9b5b-f766d63ab35b" ? aws_lb_target_group.app_tg.arn : null
   }
 }
 
@@ -110,7 +110,7 @@ resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.app_lb.arn
   port              = 443
   protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  ssl_policy        = "ELBSecurityPolicy-TLS-1-2-Ext-2018-06"
   certificate_arn   = var.certificate_arn
 
   default_action {

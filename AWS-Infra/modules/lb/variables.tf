@@ -21,7 +21,7 @@ variable "environment" {
 variable "certificate_arn" {
   description = "ARN of the SSL certificate for HTTPS listener"
   type        = string
-  default     = ""
+  default     = "arn:aws:acm:eu-west-1:875986301930:certificate/3339f69a-b097-4707-9b5b-f766d63ab35b"
 }
 
 variable "enable_deletion_protection" {
