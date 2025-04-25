@@ -9,7 +9,9 @@ pipeline {
     stage('Terraform Init') {
       steps {
         withAWS(credentials: 'awscreds') {
-          sh 'terraform init'
+          dir('LusiTech/AWS-Infra') {
+            sh 'terraform init'
+          }
         }
       }
       post {
@@ -22,7 +24,9 @@ pipeline {
     stage('Terraform Plan') {
       steps {
         withAWS(credentials: 'awscreds') {
-          sh 'terraform plan'
+          dir('LusiTech/AWS-Infra') {
+            sh 'terraform plan'
+          }
         }
       }
       post {
@@ -35,7 +39,9 @@ pipeline {
     stage('Terraform Apply') {
       steps {
         withAWS(credentials: 'awscreds') {
-          sh 'terraform apply -auto-approve'
+          dir('LusiTech/AWS-Infra') {
+            sh 'terraform apply -auto-approve'
+          }
         }
       }
       post {
