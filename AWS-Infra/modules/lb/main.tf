@@ -82,8 +82,7 @@ resource "aws_lb_target_group" "app_tg" {
   )
 }
 
-# HTTP Listener (redirect to HTTPS if certificate available, otherwise forward to target group)
-# HTTP Listener : Redirect to HTTPS
+# HTTP Listener - Redirect to HTTPS
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app_lb.arn
   port              = 80
@@ -91,26 +90,16 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type = "redirect"
-
     redirect {
       port        = "443"
       protocol    = "HTTPS"
       status_code = "HTTP_301"
     }
   }
-  dynamic "forward" {
-    for_each = var.certificate_arn == "" ? [1] : []
-    content {
-      target_group {
-        target_group_arn = aws_lb_target_group.app_tg.arn
-      }
-    }
-  }
 }
 
-# HTTPS Listener: Only if certificate is provided
+# HTTPS Listener
 resource "aws_lb_listener" "https" {
-  count             = var.certificate_arn != "" ? 1 : 0
   load_balancer_arn = aws_lb.app_lb.arn
   port              = 443
   protocol          = "HTTPS"
