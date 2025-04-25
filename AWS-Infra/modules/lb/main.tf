@@ -83,28 +83,24 @@ resource "aws_lb_target_group" "app_tg" {
 }
 
 # HTTP Listener (redirect to HTTPS if certificate available, otherwise forward to target group)
+# HTTP Listener : Redirect to HTTPS
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app_lb.arn
   port              = 80
   protocol          = "HTTP"
 
   default_action {
-    type = var.certificate_arn != "" ? "redirect" : "forward"
+    type = "redirect"
 
-    dynamic "redirect" {
-      for_each = var.certificate_arn != "" ? [1] : []
-      content {
-        port        = "443"
-        protocol    = "HTTPS"
-        status_code = "HTTP_301"
-      }
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
     }
-
-    target_group_arn = var.certificate_arn == "arn:aws:acm:eu-west-1:875986301930:certificate/3339f69a-b097-4707-9b5b-f766d63ab35b" ? aws_lb_target_group.app_tg.arn : null
   }
 }
 
-# HTTPS Listener on port 443.
+# HTTPS Listener
 resource "aws_lb_listener" "https" {
   count             = var.certificate_arn != "" ? 1 : 0
   load_balancer_arn = aws_lb.app_lb.arn
@@ -119,7 +115,7 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-# CloudWatch Alarms for the Load Balancer.
+# CloudWatch Alarms for the Load Balancer
 resource "aws_cloudwatch_metric_alarm" "high_5xx" {
   alarm_name          = "${var.project_name}-${var.environment}-high-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
