@@ -31,13 +31,13 @@ variable "dr_sg_id" {
 variable "db_instance_class" {
   description = "Instance class for the database"
   type        = string
-  default     = "db.t3.medium"
+  default     = "db.t3.micro"
 }
 
 variable "allocated_storage" {
   description = "Allocated storage for the database in GB"
   type        = number
-  default     = 20
+  default     = 10
 }
 
 variable "db_username" {
