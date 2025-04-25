@@ -58,18 +58,6 @@ variable "dr_ami_id" {
   default = "ami-010fc6854b20fbff7"
 }
 
-variable "primary_certificate_arn" {
-  description = "ARN of the SSL certificate for the primary region load balancer"
-  type        = string
-  default     = ""
-}
-
-variable "dr_certificate_arn" {
-  description = "ARN of the SSL certificate for the DR region load balancer"
-  type        = string
-  default     = ""
-}
-
 variable "ssh_public_key" {
   description = "SSH public key for accessing EC2 instances"
   type        = string
