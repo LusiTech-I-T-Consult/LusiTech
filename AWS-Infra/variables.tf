@@ -105,3 +105,34 @@ variable "primary_certificate_arn" {
   type        = string
   default     = "arn:aws:acm:eu-west-1:875986301930:certificate/991c54b4-6c96-49ea-9111-58253b0e8d7c"
 }
+
+variable "primary_asg_name" {
+  description = "Name of the primary Auto Scaling Group"
+  type        = string
+}
+
+variable "dr_asg_name" {
+  description = "Name of the DR Auto Scaling Group"
+  type        = string
+}
+
+variable "sns_topic_arn" {
+  description = "ARN of the SNS topic for email notifications"
+  type        = string
+}
+
+variable "cloudwatch_alarm_arn" {
+  description = "ARN of the CloudWatch alarm for failover"
+  type        = string
+}
+
+variable "cloudwatch_alarm_name" {
+  description = "Name of the CloudWatch alarm for failover"
+  type        = string
+}
+
+variable "admin_email" {
+  description = "Email address of the administrator"
+  default     = "hamdanialhassangandi2020@gmail.com"
+  type        = string
+}
