@@ -159,7 +159,7 @@ resource "aws_autoscaling_group" "app" {
   health_check_grace_period = 300   # 5 minutes grace period for initialization
 
   launch_template {
-    id      = var.launch_template_id
+    id      = aws_launch_template.app.id
     version = "$Latest"
   }
 
