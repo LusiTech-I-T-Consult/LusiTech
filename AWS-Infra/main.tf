@@ -204,16 +204,67 @@ module "sns" {
 
 }
 
+
 module "lambda_dr_failover" {
   source = "./modules/lambda_dr_failover"
 
   primary_asg_name      = var.primary_asg_name
   dr_asg_name           = var.dr_asg_name
   sns_topic_arn         = var.sns_topic_arn
-  cloudwatch_alarm_arn  = var.cloudwatch_alarm_arn
-  cloudwatch_alarm_name = var.cloudwatch_alarm_name
+  primary_region        = var.primary_region
   dr_region             = var.dr_region
   lambda_role_arn       = aws_iam_role.lambda_execution_role.arn
   lambda_function_name  = "${var.project_name}-${var.environment}-dr-failover"
-  tags                  = local.common_tags
+  cloudwatch_alarm_arn  = var.cloudwatch_alarm_arn
+  cloudwatch_alarm_name = var.cloudwatch_alarm_name
+  tags                  = var.tags
+}
+
+resource "aws_iam_role" "lambda_execution_role" {
+  name = "${var.project_name}-${var.environment}-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "${var.project_name}-${var.environment}-lambda-policy"
+  description = "Policy for Lambda to manage ASGs and send SNS notifications"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action : [
+          "autoscaling:UpdateAutoScalingGroup",
+          "autoscaling:DescribeAutoScalingGroups"
+        ],
+        Effect : "Allow",
+        Resource : "*"
+      },
+      {
+        Action : [
+          "sns:Publish"
+        ],
+        Effect : "Allow",
+        Resource : var.sns_topic_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
