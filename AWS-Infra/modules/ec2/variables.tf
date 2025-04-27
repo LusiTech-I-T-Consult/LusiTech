@@ -133,3 +133,13 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket for storing application assets"
   type        = string
 }
+
+variable "launch_template_name" {
+  description = "Name of the launch template"
+  type        = string
+  default     = "dr-prod-template"
+}
+
+variable "launch_template_id" {
+  default = "lt-0c48a2b5b8a3ff464"
+}

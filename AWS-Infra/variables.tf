@@ -109,30 +109,53 @@ variable "primary_certificate_arn" {
 variable "primary_asg_name" {
   description = "Name of the primary Auto Scaling Group"
   type        = string
+  default     = "pilot-light-dr-prod-app-asg"
 }
 
 variable "dr_asg_name" {
   description = "Name of the DR Auto Scaling Group"
   type        = string
+  default     = "pilot-light-dr-prod-dr-app-asg"
 }
 
 variable "sns_topic_arn" {
   description = "ARN of the SNS topic for email notifications"
   type        = string
+  default     = "arn:aws:sns:eu-west-1:875986301930:pilot"
 }
 
 variable "cloudwatch_alarm_arn" {
   description = "ARN of the CloudWatch alarm for failover"
   type        = string
+  default     = "arn:aws:cloudwatch:eu-west-1:875986301930:alarm:pilot-light-dr-prod-high-cpu"
 }
 
 variable "cloudwatch_alarm_name" {
   description = "Name of the CloudWatch alarm for failover"
   type        = string
+  default     = "pilot-light-dr-prod-high-cpu"
 }
 
 variable "admin_email" {
   description = "Email address of the administrator"
   default     = "hamdanialhassangandi2020@gmail.com"
   type        = string
+}
+
+variable "tags" {
+  description = "Tags to be applied to resources"
+  type        = map(string)
+  default = {
+    Name = "pilot-light-dr-prod"
+  }
+}
+
+variable "launch_template_name" {
+  description = "Name of the launch template"
+  type        = string
+  default     = "dr-prod-template"
+}
+
+variable "launch_template_id" {
+  default = "lt-0c48a2b5b8a3ff464"
 }

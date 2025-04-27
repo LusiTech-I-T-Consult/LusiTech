@@ -217,3 +217,52 @@ module "lambda_dr_failover" {
   lambda_function_name  = "${var.project_name}-${var.environment}-dr-failover"
   tags                  = local.common_tags
 }
+
+resource "aws_iam_role" "lambda_execution_role" {
+  name = "${var.project_name}-${var.environment}-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action = "sts:AssumeRole",
+        Effect = "Allow",
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_policy" "lambda_policy" {
+  name        = "${var.project_name}-${var.environment}-lambda-policy"
+  description = "Policy for Lambda to manage ASGs and send SNS notifications"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action : [
+          "autoscaling:UpdateAutoScalingGroup",
+          "autoscaling:DescribeAutoScalingGroups"
+        ],
+        Effect : "Allow",
+        Resource : "*"
+      },
+      {
+        Action : [
+          "sns:Publish"
+        ],
+        Effect : "Allow",
+        Resource : var.sns_topic_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
+  role       = aws_iam_role.lambda_execution_role.name
+  policy_arn = aws_iam_policy.lambda_policy.arn
+}
