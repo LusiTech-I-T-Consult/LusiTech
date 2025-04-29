@@ -4,6 +4,8 @@
 
 This document outlines the pilot light disaster recovery (DR) strategy implemented for our Django application. A pilot light disaster recovery approach keeps essential systems running in a secondary region with minimal resources, allowing for quick recovery in case of a regional failure.
 
+![fgds](/src/dr.drawio.png)
+
 ## Disaster Recovery Strategies Overview
 
 There are four main disaster recovery strategies with different trade-offs between cost and recovery time:
