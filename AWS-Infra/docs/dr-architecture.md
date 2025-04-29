@@ -3,7 +3,7 @@
 This document describes the disaster recovery architecture implemented for our Django application using the pilot light strategy.
 
 ## Architecture Overview
-![](../src/dr.drawio.png)
+![fgds](./src/dr.drawio.png)
 
 ## Components
 
