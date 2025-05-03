@@ -13,7 +13,7 @@ There are four main disaster recovery strategies with different trade-offs betwe
 1. **Backup & Restore** - Lowest cost, longest recovery time (hours to days)
 2. **Pilot Light** - Low cost, medium recovery time (minutes to hours)
 3. **Warm Standby** - Medium cost, short recovery time (minutes)
-4. **Multi-Site Active/Active** - Highest cost, minimal recovery time (seconds to minutes)
+4. **Multi-Site Active/Active** - Highest cost, minimal recovery time (seconds to minutes).
 
 We've chosen the Pilot Light approach because it provides a good balance between cost-effectiveness and recovery time objectives.
 
